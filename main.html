@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- shims -->
+	<script src="./midi-js/inc/shim/Base64.js" type="text/javascript"></script>
+	<script src="./midi-js/inc/shim/Base64binary.js" type="text/javascript"></script>
+	<script src="./midi-js/inc/shim/WebAudioAPI.js" type="text/javascript"></script>
+	<!-- midi.js -->
+	<script src="./midi-js/js/midi/audioDetect.js" type="text/javascript"></script>
+	<script src="./midi-js/js/midi/gm.js" type="text/javascript"></script>
+	<script src="./midi-js/js/midi/loader.js" type="text/javascript"></script>
+	<script src="./midi-js/js/midi/plugin.audiotag.js" type="text/javascript"></script>
+	<script src="./midi-js/js/midi/plugin.webaudio.js" type="text/javascript"></script>
+	<script src="./midi-js/js/midi/plugin.webmidi.js" type="text/javascript"></script>
+	<!-- utils -->
+	<script src="./midi-js/js/util/dom_request_xhr.js" type="text/javascript"></script>
+	<script src="./midi-js/js/util/dom_request_script.js" type="text/javascript"></script>
+
+	<!-- jQuery -->
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.js"></script>
+
+</head>
+
+<style>
+
+#whiteboard { height:250px; width:250px; 
+    position:absolute; top:0px; left:500px;
+    border:2px solid grey;
+    background:darkgrey; }
+
+.black_key { height:100px; background:black; position:absolute; top:400px }
+.white_key { height:150px; background:white; position:absolute; top:400px }
+button {
+    width:50px;
+}
+</style>
+
+<body>
+
+<h3>COMP4431 MIDI Keyboard</h3>
+
+<p>You may need to wait a couple of seconds for the sound to load.<br>
+This page uses multiple instruments to play the notes.</p>
+
+  <label for="amplitude">MIDI amplitude (0-127):</label>
+  <input type="range" id="amplitude" min="0" max="127" value="100">
+  <br><br>
+
+<!-- Select Pitch -->
+
+  <label for="pitch">MIDI Pitch (21-108):</label>
+  <input type="range" id="pitch" min="21" max="84" value="50">
+  <br><br>
+
+<!-- Select Instrument-->
+
+  Select your musical instrument:
+  <select id="myInstrumentSelect">
+  <option value="56">Trumpet</option>
+  <option value="75">Pan Flute</option>
+  <option value="17">Percussive Organ</option>
+  <option value="46">Orchestral Harp</option>
+  <option value="55">Orchestral Hit</option>
+  <option value="79">Ocarina</option>
+  <option value="68">Oboe</option>
+  <option value="87">Lead 8 Bass</option>
+  <option value="12">Marimba</option>
+  <option value="10">Music Box</option><br>
+</select><br>
+
+<!-- Select chord -->
+
+<form id="myChordSelect">
+  <input type="radio" name="musicMode" value="Single" checked> Single Note<br>
+  <input type="radio" name="musicMode" value="Major"> Major Chord<br>
+  <input type="radio" name="musicMode" value="Minor"> Minor Chord<br>
+</form> 
+
+<div id="whiteboard">
+</div>
+<p>You can use your laptop/PC keyboard to play this paino as well. <br>
+Use 'a' to play the first white key and the rest of the white keys can be played from 'q' to '\'<br>
+Similarly for the black keys use keys '1' to '+' and `'` key for the last black key. <br>
+Enjoy - <br>
+Tanmay and Anish</p>
+
+<form>
+
+<!-- First we draw the white keys -->
+
+<button type="button" id = "0" class="white_key" data-piano-key-number="0" style="left:50px"></button>
+<button type="button" id = "2" class="white_key" data-piano-key-number="2" style="left:100px"></button>
+<button type="button" id = "4" class="white_key" data-piano-key-number="4" style="left:150px"></button>
+<button type="button" id = "5" class="white_key" data-piano-key-number="5" style="left:200px"></button>
+<button type="button" id = "7" class="white_key" data-piano-key-number="7" style="left:250px"></button>
+<button type="button" id = "9" class="white_key" data-piano-key-number="9" style="left:300px"></button>
+<button type="button" id = "11" class="white_key" data-piano-key-number="11" style="left:350px"></button>
+<button type="button" id = "12" class="white_key" data-piano-key-number="12" style="left:400px"></button>
+<button type="button" id = "14" class="white_key" data-piano-key-number="14" style="left:450px"></button>
+<button type="button" id = "16" class="white_key" data-piano-key-number="16" style="left:500px"></button>
+<button type="button" id = "17" class="white_key" data-piano-key-number="17" style="left:550px"></button>
+<button type="button" id = "19" class="white_key" data-piano-key-number="19" style="left:600px"></button>
+<button type="button" id = "21" class="white_key" data-piano-key-number="21" style="left:650px"></button>
+<button type="button" id = "23" class="white_key" data-piano-key-number="23" style="left:700px"></button>
+
+<!-- Now we draw the black keys, so they appear on top of the white keys
+(in a web page, things included later are normally shown on top of things included earlier) -->
+
+<button type="button" id = "1" class="black_key" data-piano-key-number="1" style="left:75px"></button>
+<button type="button" id = "3" class="black_key" data-piano-key-number="3" style="left:125px"></button>
+<button type="button" id = "6" class="black_key" data-piano-key-number="6" style="left:225px"></button>
+<button type="button" id = "8" class="black_key" data-piano-key-number="8" style="left:275px"></button>
+<button type="button" id = "10" class="black_key" data-piano-key-number="10" style="left:325px"></button>
+<button type="button" id = "13" class="black_key" data-piano-key-number="13" style="left:425px"></button>
+<button type="button" id = "15" class="black_key" data-piano-key-number="15" style="left:475px"></button>
+<button type="button" id = "18" class="black_key" data-piano-key-number="18" style="left:575px"></button>
+<button type="button" id = "20" class="black_key" data-piano-key-number="20" style="left:625px"></button>
+<button type="button" id = "22" class="black_key" data-piano-key-number="22" style="left:675px"></button>
+
+</form>
+
+
+<script>
+
+var this_pitch;
+var this_key;
+var instrument_value=56;
+var lowest_pitch=60; // The MIDI pitch number for the first (left) keyboard key
+var whiteboard_last_node=-99;
+var whiteboard_mode=false;
+var key_last_node=-99;
+var last_color =-99
+
+
+function handleWhiteboardPress(evt) {
+  whiteboard_mode=true;
+  var x = evt.pageX - $("#whiteboard").offset().left;
+  var square_length=254; //250+4 (border)
+  var x_fraction= x/square_length;
+  this_pitch = 21 + (x_fraction * 88);
+  this_pitch=parseInt(this_pitch);
+  var y = evt.pageY - $("#whiteboard").offset().top;
+  var y_fraction=y/square_length;
+  this_amplitude = y_fraction *128;
+  this_amplitude = 127 - this_amplitude;
+  this_amplitude=parseInt(this_amplitude);
+  if (this_pitch>=21&&this_pitch<=108&&this_amplitude>=0&&this_amplitude<=127) 
+  {
+  MIDI.noteOn(0,this_pitch,this_amplitude);
+  }
+  whiteboard_last_node=this_pitch;
+  if ($(":radio[name=musicMode]:checked").val()=="Major")
+  {
+    if((this_pitch+4)<=108)
+      {
+      MIDI.noteOn(0, this_pitch+4, this_amplitude);
+      }
+    if(this_pitch+7<=108)
+      {
+      MIDI.noteOn(0, this_pitch+7, this_amplitude);
+      }
+  }
+
+  if($(":radio[name=musicMode]:checked").val()=="Minor")
+  {
+     if((this_pitch+3)<=108)
+      {
+      MIDI.noteOn(0, this_pitch+3, this_amplitude);
+      }
+    if(this_pitch+7<=108)
+      {
+      MIDI.noteOn(0, this_pitch+7, this_amplitude);
+      }
+  }
+
+  
+};
+
+function handleWhiteboardRelease(evt) {
+  whiteboard_mode=false;
+  console.log("Key release event for key " + this_pitch + "!");
+  MIDI.noteOff(0, this_pitch);
+  whiteboard_last_node=-99;
+  if ($(":radio[name=musicMode]:checked").val()=="Major")
+  {
+      MIDI.noteOff(0, this_pitch+4);
+      MIDI.noteOff(0, this_pitch+7);
+      console.log("Key release major for key " + this_pitch + "!");
+  }
+
+    if ($(":radio[name=musicMode]:checked").val()=="Minor")
+  {
+      MIDI.noteOff(0, this_pitch+3);
+      MIDI.noteOff(0, this_pitch+7);
+      console.log("Key release minor for key " + this_pitch + "!");
+  }
+};
+
+function handleWhiteboardMove(evt) {
+  if (whiteboard_mode == true) 
+  {
+    if(whiteboard_last_node != -99) 
+    {
+      MIDI.noteOff(0, this_pitch);
+      if ($(":radio[name=musicMode]:checked").val()=="Major")
+  {
+      MIDI.noteOff(0, this_pitch+4);
+      MIDI.noteOff(0, this_pitch+7);
+      console.log("Key release major for key " + this_pitch + "!");
+  }
+
+    if ($(":radio[name=musicMode]:checked").val()=="Minor")
+  {
+      MIDI.noteOff(0, this_pitch+3);
+      MIDI.noteOff(0, this_pitch+7);
+      console.log("Key release minor for key " + this_pitch + "!");
+  }
+    }
+    var x = evt.pageX - $("#whiteboard").offset().left;
+    var square_length=254;
+    var x_fraction = x/square_length;
+    this_pitch = 21+(x_fraction*88);
+    this_pitch=parseInt(this_pitch);
+    var y = evt.pageY - $("#whiteboard").offset().top;
+    var y_fraction = y/square_length;
+    this_amplitude = y_fraction*128;
+    this_amplitude = 127-this_amplitude;
+    this_amplitude=parseInt(this_amplitude);
+    if (this_pitch>=21&&this_pitch<=108&&this_amplitude>=0&&this_amplitude<=127) {
+    MIDI.noteOn(0, this_pitch, this_amplitude);
+    console.log("Key movemove " + this_pitch + "!");
+    whiteboard_mode =true;
+    whiteboard_last_node = this_pitch;
+  if ($(":radio[name=musicMode]:checked").val()=="Major")
+    {
+      if((this_pitch+4)<=108)
+        {
+        MIDI.noteOn(0, this_pitch+4, this_amplitude);
+        }
+      if(this_pitch+7<=108)
+        {
+        MIDI.noteOn(0, this_pitch+7, this_amplitude);
+        }
+    }
+  if($(":radio[name=musicMode]:checked").val()=="Minor")
+    {
+       if((this_pitch+3)<=108)
+        {
+        MIDI.noteOn(0, this_pitch+3, this_amplitude);
+        }
+      if(this_pitch+7<=108)
+        {
+        MIDI.noteOn(0, this_pitch+7, this_amplitude);
+        }
+     }
+     }
+  }
+};
+
+
+function handlePianoKeyPress(evt) {
+  var this_key;
+  var this_amplitude;
+  // Determine which piano key has been pressed.
+  // 'evt.target' tells us exactly which item triggered this function.
+  // The piano key number is taken from the 'data-piano-key-number' attribute of each button.
+  // The piano key number is a value in the range 0 to 23 inclusive.
+  this_key = $(evt.target).data("pianoKeyNumber");
+  lowest_pitch=$("#pitch").val();
+  lowest_pitch=parseInt(lowest_pitch);
+  this_pitch = lowest_pitch + parseInt(this_key);
+  // Extract the amplitude value from the slider
+  this_amplitude=$("#amplitude").val();
+  // Convert the string into actual values
+  this_amplitude=parseInt(this_amplitude);
+  // Use the two numbers to start a MIDI note
+  MIDI.noteOn(0, this_pitch, this_amplitude);
+  // Handle chord mode
+  if ($(":radio[name=musicMode]:checked").val()=="Major")
+  {
+    if((this_pitch+4)<=108)
+      {
+      MIDI.noteOn(0, this_pitch+4, this_amplitude);
+      }
+    if(this_pitch+7<=108)
+      {
+      MIDI.noteOn(0, this_pitch+7, this_amplitude);
+      }
+  }
+  if($(":radio[name=musicMode]:checked").val()=="Minor")
+  {
+     if((this_pitch+3)<=108)
+      {
+      MIDI.noteOn(0, this_pitch+3, this_amplitude);
+      }
+    if(this_pitch+7<=108)
+      {
+      MIDI.noteOn(0, this_pitch+7, this_amplitude);
+      }
+  }
+  // Show a simple message in the console
+  console.log("Key press event for key " + this_pitch + "!");
+};
+
+
+
+function handlePianoKeyRelease(evt) {""
+  // Send the note off message to match the pitch of the current note on event
+  MIDI.noteOff(0, this_pitch); 
+  
+  // Show a simple message in the console
+  console.log("Key release event for key " + this_pitch + "!");
+  
+  
+  // Handle chord mode
+
+   if ($(":radio[name=musicMode]:checked").val()=="Major")
+  {
+      MIDI.noteOff(0, this_pitch+4);
+      MIDI.noteOff(0, this_pitch+7);
+  }
+
+    if ($(":radio[name=musicMode]:checked").val()=="Minor")
+  {
+      MIDI.noteOff(0, this_pitch+3);
+      MIDI.noteOff(0, this_pitch+7);
+  }
+
+};
+
+function handleKeyboardPress(this_key) {
+  var this_amplitude;
+    if(key_last_node != -99) 
+    {
+      MIDI.noteOff(0, key_last_node);
+      if ($(":radio[name=musicMode]:checked").val()=="Major")
+  {
+      MIDI.noteOff(0, key_last_node+4);
+      MIDI.noteOff(0, key_last_node+7);
+      console.log("Key release major for key " + key_last_node + "!");
+  }
+    if ($(":radio[name=musicMode]:checked").val()=="Minor")
+  {
+      MIDI.noteOff(0, key_last_node+3);
+      MIDI.noteOff(0, key_last_node+7);
+      console.log("Key release minor for key " + key_last_node + "!");
+  }
+  key_last_node=-99;
+    }
+  lowest_pitch=$("#pitch").val();
+  lowest_pitch=parseInt(lowest_pitch);
+  this_pitch = lowest_pitch + parseInt(this_key);
+  console.log("Key event for key " + this_pitch + "!");
+  // Extract the amplitude value from the slider
+  this_amplitude=$("#amplitude").val();
+  // Convert the string into actual values
+  this_amplitude=parseInt(this_amplitude);
+  // Use the two numbers to start a MIDI note
+  MIDI.noteOn(0, this_pitch, this_amplitude);
+  key_last_node=this_pitch;
+  // Handle chord mode
+  if ($(":radio[name=musicMode]:checked").val()=="Major")
+  {
+    if((this_pitch+4)<=108)
+      {
+      MIDI.noteOn(0, this_pitch+4, this_amplitude);
+      }
+    if(this_pitch+7<=108)
+      {
+      MIDI.noteOn(0, this_pitch+7, this_amplitude);
+      }
+  }
+  if($(":radio[name=musicMode]:checked").val()=="Minor")
+  {
+     if((this_pitch+3)<=108)
+      {
+      MIDI.noteOn(0, this_pitch+3, this_amplitude);
+      }
+    if(this_pitch+7<=108)
+      {
+      MIDI.noteOn(0, this_pitch+7, this_amplitude);
+      }
+  }
+  // Show a simple message in the console
+
+};
+
+function handleKeyboardRelease(evt) {
+  // Send the note off message to match the pitch of the current note on event
+ 
+  MIDI.noteOff(0, this_pitch); 
+  
+  // Show a simple message in the console
+  console.log("Keyboard release event for key " + this_pitch + "!");
+  
+  // Handle chord mode
+
+   if ($(":radio[name=musicMode]:checked").val()=="Major")
+  {
+      MIDI.noteOff(0, this_pitch+4);
+      MIDI.noteOff(0, this_pitch+7);
+  }
+
+    if ($(":radio[name=musicMode]:checked").val()=="Minor")
+  {
+      MIDI.noteOff(0, this_pitch+3);
+      MIDI.noteOff(0, this_pitch+7);
+  }
+};  
+
+function downpresspianokey() {
+ if (last_color != -99) {
+    var key = document.getElementById(last_color);
+    if (key) {
+    key.style.transform = 'translateY(0px)';
+    if (last_color == "0" || last_color == "2" || last_color == "4" || last_color == "5" || last_color == "7" || last_color == "9" || last_color == "11" || last_color == "12" || last_color == "14" || last_color == "16" || last_color == "17" || last_color == "19" || last_color == "21") {
+    key.style.background='#FFFFFF';
+    }
+ }
+
+ if ($(":radio[name=musicMode]:checked").val()=="Major")  {
+      var major_key1 = parseInt(last_color) + 4;
+      var major_key2 = parseInt(last_color) + 7;
+      
+      var key1 = document.getElementById(major_key1.toString());
+      var key2 = document.getElementById(major_key2.toString());
+
+      if (key1) {
+            key1.style.transform = 'translateY(0px)';
+            if (major_key1.toString() == "0" || major_key1.toString() == "2" || major_key1.toString() == "4" || major_key1.toString() == "5" || major_key1.toString() == "7" || major_key1.toString() == "9" || major_key1.toString() == "11" || major_key1.toString() == "12" || major_key1.toString() == "14" || major_key1.toString() == "16" || major_key1.toString() == "17" || major_key1.toString() == "19" || major_key1.toString() == "21") {
+                key1.style.background='#FFFFFF';
+            }
+      }
+     if (key2) {
+        key2.style.transform = 'translateY(0px)';
+        if (major_key2.toString() == "0" || major_key2.toString() == "2" || major_key2.toString() == "4" || major_key2.toString() == "5" || major_key2.toString() == "7" || major_key2.toString() == "9" || major_key2.toString() == "11" || major_key2.toString() == "12" || major_key2.toString() == "14" || major_key2.toString() == "16" || major_key2.toString() == "17" || major_key2.toString() == "19" || major_key2.toString() == "21") {
+          key2.style.background='#FFFFFF';
+        }
+     }
+  }
+  if ($(":radio[name=musicMode]:checked").val()=="Minor")  {
+      var major_key1 = parseInt(last_color) + 3;
+      var major_key2 = parseInt(last_color) + 7;
+      
+      var key1 = document.getElementById(major_key1.toString());
+      var key2 = document.getElementById(major_key2.toString());
+
+      if (key1) {
+            key1.style.transform = 'translateY(0px)';
+            if (major_key1.toString() == "0" || major_key1.toString() == "2" || major_key1.toString() == "4" || major_key1.toString() == "5" || major_key1.toString() == "7" || major_key1.toString() == "9" || major_key1.toString() == "11" || major_key1.toString() == "12" || major_key1.toString() == "14" || major_key1.toString() == "16" || major_key1.toString() == "17" || major_key1.toString() == "19" || major_key1.toString() == "21") {
+                key1.style.background='#FFFFFF';
+            }
+      }
+     if (key2) {
+        key2.style.transform = 'translateY(0px)';
+        if (major_key2.toString() == "0" || major_key2.toString() == "2" || major_key2.toString() == "4" || major_key2.toString() == "5" || major_key2.toString() == "7" || major_key2.toString() == "9" || major_key2.toString() == "11" || major_key2.toString() == "12" || major_key2.toString() == "14" || major_key2.toString() == "16" || major_key2.toString() == "17" || major_key2.toString() == "19" || major_key2.toString() == "21") {
+          key2.style.background='#FFFFFF';
+        }
+     }
+  }
+    last_color = -99;
+ }
+
+ var key = document.getElementById(this_key);
+ if (key) {
+    key.style.transform = 'translateY(10px)';
+    if (this_key == "0" || this_key == "2" || this_key == "4" || this_key == "5" || this_key == "7" || this_key == "9" || this_key == "11" || this_key == "12" || this_key == "14" || this_key == "16" || this_key == "17" || this_key == "19" || this_key == "21") {
+    key.style.background='#d2d1d1';
+    }
+ } 
+ last_color=this_key;
+
+ if ($(":radio[name=musicMode]:checked").val()=="Major")  {
+      var major_key1 = parseInt(this_key) + 4;
+      var major_key2 = parseInt(this_key) + 7;
+      
+      var key1 = document.getElementById(major_key1.toString());
+      var key2 = document.getElementById(major_key2.toString());
+
+      if (key1) {
+            key1.style.transform = 'translateY(10px)';
+            if (major_key1.toString() == "0" || major_key1.toString() == "2" || major_key1.toString() == "4" || major_key1.toString() == "5" || major_key1.toString() == "7" || major_key1.toString() == "9" || major_key1.toString() == "11" || major_key1.toString() == "12" || major_key1.toString() == "14" || major_key1.toString() == "16" || major_key1.toString() == "17" || major_key1.toString() == "19" || major_key1.toString() == "21") {
+                key1.style.background='#d2d1d1';
+            }
+      }
+     if (key2) {
+        key2.style.transform = 'translateY(10px)';
+        if (major_key2.toString() == "0" || major_key2.toString() == "2" || major_key2.toString() == "4" || major_key2.toString() == "5" || major_key2.toString() == "7" || major_key2.toString() == "9" || major_key2.toString() == "11" || major_key2.toString() == "12" || major_key2.toString() == "14" || major_key2.toString() == "16" || major_key2.toString() == "17" || major_key2.toString() == "19" || major_key2.toString() == "21") {
+          key2.style.background='#d2d1d1';
+        }
+     }
+  }
+  if ($(":radio[name=musicMode]:checked").val()=="Minor")  {
+      var major_key1 = parseInt(this_key) + 3;
+      var major_key2 = parseInt(this_key) + 7;
+      
+      var key1 = document.getElementById(major_key1.toString());
+      var key2 = document.getElementById(major_key2.toString());
+
+      if (key1) {
+            key1.style.transform = 'translateY(10px)';
+            if (major_key1.toString() == "0" || major_key1.toString() == "2" || major_key1.toString() == "4" || major_key1.toString() == "5" || major_key1.toString() == "7" || major_key1.toString() == "9" || major_key1.toString() == "11" || major_key1.toString() == "12" || major_key1.toString() == "14" || major_key1.toString() == "16" || major_key1.toString() == "17" || major_key1.toString() == "19" || major_key1.toString() == "21") {
+                key1.style.background='#d2d1d1';
+            }
+      }
+     if (key2) {
+        key2.style.transform = 'translateY(10px)';
+        if (major_key2.toString() == "0" || major_key2.toString() == "2" || major_key2.toString() == "4" || major_key2.toString() == "5" || major_key2.toString() == "7" || major_key2.toString() == "9" || major_key2.toString() == "11" || major_key2.toString() == "12" || major_key2.toString() == "14" || major_key2.toString() == "16" || major_key2.toString() == "17" || major_key2.toString() == "19" || major_key2.toString() == "21") {
+          key2.style.background='#d2d1d1';
+        }
+     }
+  }
+};
+
+function releasepianokey() {
+ var key = document.getElementById(this_key);
+ if (key) {
+    key.style.transform = 'translateY(0px)';
+    if (this_key == "0" || this_key == "2" || this_key == "4" || this_key == "5" || this_key == "7" || this_key == "9" || this_key == "11" || this_key == "12" || this_key == "14" || this_key == "16" || this_key == "16" || this_key == "17" || this_key == "19" || this_key == "21") {
+    key.style.background='#FFFFFF';
+    }
+ }
+
+ if ($(":radio[name=musicMode]:checked").val()=="Major")  {
+      var major_key1 = parseInt(this_key) + 4;
+      var major_key2 = parseInt(this_key) + 7;
+      
+      var key1 = document.getElementById(major_key1.toString());
+      var key2 = document.getElementById(major_key2.toString());
+
+      if (key1) {
+            key1.style.transform = 'translateY(0px)';
+            if (major_key1.toString() == "0" || major_key1.toString() == "2" || major_key1.toString() == "4" || major_key1.toString() == "5" || major_key1.toString() == "7" || major_key1.toString() == "9" || major_key1.toString() == "11" || major_key1.toString() == "12" || major_key1.toString() == "14" || major_key1.toString() == "16" || major_key1.toString() == "17" || major_key1.toString() == "19" || major_key1.toString() == "21") {
+                key1.style.background='#FFFFFF';
+            }
+      }
+     if (key2) {
+        key2.style.transform = 'translateY(0px)';
+        if (major_key2.toString() == "0" || major_key2.toString() == "2" || major_key2.toString() == "4" || major_key2.toString() == "5" || major_key2.toString() == "7" || major_key2.toString() == "9" || major_key2.toString() == "11" || major_key2.toString() == "12" || major_key2.toString() == "14" || major_key2.toString() == "16" || major_key2.toString() == "17" || major_key2.toString() == "19" || major_key2.toString() == "21") {
+          key2.style.background='#FFFFFF';
+        }
+     }
+  }
+  if ($(":radio[name=musicMode]:checked").val()=="Minor")  {
+      var major_key1 = parseInt(this_key) + 3;
+      var major_key2 = parseInt(this_key) + 7;
+      
+      var key1 = document.getElementById(major_key1.toString());
+      var key2 = document.getElementById(major_key2.toString());
+
+      if (key1) {
+            key1.style.transform = 'translateY(0px)';
+            if (major_key1.toString() == "0" || major_key1.toString() == "2" || major_key1.toString() == "4" || major_key1.toString() == "5" || major_key1.toString() == "7" || major_key1.toString() == "9" || major_key1.toString() == "11" || major_key1.toString() == "12" || major_key1.toString() == "14" || major_key1.toString() == "16" || major_key1.toString() == "17" || major_key1.toString() == "19" || major_key1.toString() == "21") {
+                key1.style.background='#FFFFFF';
+            }
+      }
+     if (key2) {
+        key2.style.transform = 'translateY(0px)';
+        if (major_key2.toString() == "0" || major_key2.toString() == "2" || major_key2.toString() == "4" || major_key2.toString() == "5" || major_key2.toString() == "7" || major_key2.toString() == "9" || major_key2.toString() == "11" || major_key2.toString() == "12" || major_key2.toString() == "14" || major_key2.toString() == "16" || major_key2.toString() == "17" || major_key2.toString() == "19" || major_key2.toString() == "21") {
+          key2.style.background='#FFFFFF';
+        }
+     }
+  } 
+
+}; 
+
+
+
+$( document ).ready( function() {
+	
+  $("#myInstrumentSelect").change(function(){
+//  alert("The text has been changed.");
+  instrument_value = $("#myInstrumentSelect").val();
+  instrument_value = parseInt(instrument_value);
+  MIDI.programChange(0, instrument_value);
+  });
+
+  $("#whiteboard").mouseleave(function() {
+      handleWhiteboardRelease();
+    });
+
+  $(document).keypress(function(e) {
+              var this_amplitude;
+
+        switch (e.which) {
+                case 97:
+                         this_key=0; //a
+                         break; 
+                case 113:
+                         this_key=2; //q
+                         break; 
+                case 119:
+                         this_key=4; //w
+                         break; 
+                case 101:
+                         this_key=5; //e
+                         break; 
+                case 114:
+                         this_key=7; //r
+                         break; 
+                case 116:
+                         this_key=9; //t
+                         break; 
+                case 121:
+                         this_key=11; //y
+                         break;
+                case 117:
+                         this_key=12; //u
+                         break;
+                case 105:
+                         this_key=14; //i
+                         break;
+                case 111:
+                         this_key=16; //o
+                         break;
+                case 112:
+                         this_key=17; //p
+                         break;
+                case 91:
+                         this_key=19; //[
+                         break;
+                case 93:
+                         this_key=21; //]
+                         break;
+                case 92:
+                         this_key=23; //\
+                         break;
+                case 49:
+                         this_key=1; //1
+                         break;
+                case 50:
+                         this_key=3; //2
+                         break;
+                case 52:
+                         this_key=6; //4
+                         break;
+                case 53:
+                         this_key=8; //5
+                         break;
+                case 54:
+                         this_key=10; //6
+                         break;
+                case 56:
+                         this_key=13; //8
+                         break;
+                case 57:
+                         this_key=15; //9
+                         break;
+                case 45:
+                         this_key=18; //-
+                         break;
+                case 61:
+                         this_key=20; //=
+                         break;
+                case 39:
+                         this_key=22; // "'
+                         break;
+                default: 
+                        this_key=-99;
+                        console.log("Invalid entry.");
+             }
+            // if (e.which==97) this_key=0; //a
+            // if (e.which==113) this_key=2; //q
+            // if (e.which==119) this_key=4; //w
+            // if (e.which==101) this_key=5; //e
+            // if (e.which==114) this_key=7; //r
+            //if (e.which==116) this_key=9; //t
+            // if (e.which==121) this_key=11; //y
+            // if (e.which==117) this_key=12; //u
+            // if (e.which==105) this_key=14; //i
+            // if (e.which==111) this_key=16; //o
+            // if (e.which==112) this_key=17; //p
+            // if (e.which==91) this_key=19; //[
+            // if (e.which==93) this_key=21; //]
+            // if (e.which==92) this_key=23; //\
+  // black keys
+            // if (e.which==49) this_key=1; //1
+            // if (e.which==50) this_key=3; //2
+            // if (e.which==51) this_key=6; //3
+            // if (e.which==52) this_key=8; //4
+            // if (e.which==53) this_key=10; //5
+            // if (e.which==54) this_key=13; //6
+            // if (e.which==55) this_key=15; //7
+            // if (e.which==56) this_key=18; //8
+            // if (e.which==57) this_key=20; //9
+            // if (e.which==48) this_key=22; //0
+            if(this_key!=-99)
+            {
+            handleKeyboardPress(this_key);
+            downpresspianokey(this_key);
+            }
+      });
+  $(document).keyup(function(e) {
+          handleKeyboardRelease(e);
+          releasepianokey();
+      });  
+
+  MIDI.loadPlugin({
+		soundfontUrl: "./midi-js/soundfont/",
+		instrument: "trumpet",
+		onprogress: function(state, progress) {
+			console.log(state, progress);
+		},
+		onsuccess: function() {
+
+      $("body").click(function() {
+        if (MIDI.getContext().state != "running") {
+          MIDI.getContext().resume().then(() => {
+            console.log("Audio Context is resumed!");
+          });
+        }
+      });
+
+			// At this point the MIDI system is ready to be used
+			MIDI.setVolume(0,127); // Set the general volume level			
+			MIDI.programChange(0,instrument_value); // Use the General MIDI 'trumpet' number
+
+			// Set up the event handlers for all the buttons
+			$("button").on("mousedown", handlePianoKeyPress);
+			$("button").on("mouseup", handlePianoKeyRelease);
+      $("#whiteboard").on("mousedown", handleWhiteboardPress);
+      $("#whiteboard").on("mouseup", handleWhiteboardRelease);
+      $("#whiteboard").on("mousemove", handleWhiteboardMove);
+		}
+	});
+});
+
+</script>
+
+<div style='text-align: right;position: fixed;z-index:9999999;bottom: 0; width: 100%;cursor: pointer;line-height: 0;display:block !important;'><a title="Hosted on free web hosting 000webhost.com. Host your own website for FREE." target="_blank" href="https://www.000webhost.com/free-website-sign-up?utm_source=000webhostapp&amp;utm_campaign=000_logo&amp;utm_medium=website_asaksena4&amp;utm_content=footer_img"><img src="https://cdn.rawgit.com/000webhost/logo/e9bd13f7/footer-powered-by-000webhost-white2.png"  alt="www.000webhost.com"></a></div></body>
+</html>
+
+

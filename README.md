@@ -1,6 +1,6 @@
 # online-piano
 
-Try it our here - https://bit.ly/2XV9oIt
+Try it out here - https://bit.ly/2XV9oIt
 
 Some cool features
 
